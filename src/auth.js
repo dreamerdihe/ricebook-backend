@@ -15,32 +15,28 @@ function login(req, res) {
     if (!username || !password) {
         return res.status(401).send(false)
     }
-
-    Users.findOne({username: username}, (err, user) => {
-        if (err) {
-            console.log(err)
-            return
-        }
-
-        console.log(user)
+    
+    getUser(username).then(user => {
         const hashedPassword = md5(user.salt + password)
+        
         if (!user || hashedPassword !== user.hashedPassword) {
             return res.status(401),send(false)
         }
         
         const sessionKey = md5(mySecretMessage + new Date().getTime() + user.username)
-
+        
         Session.create({sessionId: sessionKey}, function(err, session) {
             if (err) {
             console.log(err);
             return;
             }
             res.cookie(cookieKey, session.sessionId, { maxAge: 3600*1000, httpOnly: true});
-            res.status(200).send({username: username, result: 'success'})
+            return res.status(200).send({username: username, result: 'success'})
             });
+    }).catch(err => {
+        console.log(err)
+        return
     })
-
-    return 
 }
 
 function logout(req, res) {
@@ -64,23 +60,32 @@ function register(req, res) {
     const username = req.body.username
     const password = req.body.password
     // if the username and password is invalid
-    console.log(username, password)
     if (!username || !password) {
         return res.sendStatus(401)
     }
     // if the username dupilcates
-    const duplicate = getUser(username)
-    if (duplicate) {
-        return res.send({"result": "username duplicate"})
-    }
-    // restore the user into the Users database
-    const hashedPassword = md5(salt + password)
-    Users.create({username: username, salt: salt, hashedPassword: hashedPassword})
-    return res.sendStatus(200)
+    getUser(username)
+    .then((duplicate) => {
+        if (duplicate) {
+            return res.send({"result": "username duplicate"})
+        } 
+        const hashedPassword = md5(salt + password)
+        // restore the user into the Users database
+        Users.create({username: username, salt: salt, hashedPassword: hashedPassword})
+        return res.sendStatus(200)
+    }).catch(err => {
+        console.log(err)
+        return
+    })
+    
 }
 
 function changePassword(req, res) {
     // Implement the function of changePassword
+}
+
+getUser = function(username) {
+    return Users.findOne({username: username}).exec()
 }
 
 module.exports = (app, isloggedin) => {
