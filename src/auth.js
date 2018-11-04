@@ -90,7 +90,7 @@ function register(req, res) {
         const zipcode = req.body.zipcode
         Profiles.create({username: username, status: "", following: [], email: email, 
                         phone: phone, dob: dob, zipcode: zipcode, avatar: ""})
-        return res.sendStatus(200)
+        return res.status(200).send({username: username, result: 'success'})
     })
     
 }
