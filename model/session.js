@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 const SessionSchema = new mongoose.Schema({
-sessionId: String
+    username: String,
+    sessionId: String
 });
 
 module.exports = mongoose.model("Session", SessionSchema);
