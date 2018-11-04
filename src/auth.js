@@ -1,7 +1,12 @@
 const fs = require('fs')
 const md5 = require('md5')
+
+//import mongoDB
 const Session = require('../model/session')
 const Users = require('../model/user')
+const Profiles = require('../model/profile')
+
+// some CONST
 const cookieKey = 'sid'
 const mySecretMessage = 'comp531 is very difficult'
 const salt = "this is a salt"
@@ -9,6 +14,7 @@ const salt = "this is a salt"
 
 // fix the sessionUser
 function login(req, res) {
+    console.log("one request for login")
     const username = req.body.username
     const password = req.body.password
 
@@ -16,16 +22,21 @@ function login(req, res) {
         return res.status(401).send(false)
     }
     
-    getUser(username).then(user => {
+    Users.findOne({username: username}).exec((err, user) => {
+        if (err) {
+            console.log(err)
+            return res.sendStatus(401)
+        }
+
         const hashedPassword = md5(user.salt + password)
         
         if (!user || hashedPassword !== user.hashedPassword) {
-            return res.status(401),send(false)
+            return res.status(401).send(false)
         }
         
         const sessionKey = md5(mySecretMessage + new Date().getTime() + user.username)
         
-        Session.create({sessionId: sessionKey}, function(err, session) {
+        Session.create({username: username, sessionId: sessionKey}, function(err, session) {
             if (err) {
             console.log(err);
             return;
@@ -33,14 +44,11 @@ function login(req, res) {
             res.cookie(cookieKey, session.sessionId, { maxAge: 3600*1000, httpOnly: true});
             return res.status(200).send({username: username, result: 'success'})
             });
-    }).catch(err => {
-        console.log(err)
-        return
     })
 }
 
 function logout(req, res) {
-    console.log('request for logout')
+    console.log(req.username + ' request for logout')
     const sid = req.cookies[cookieKey]
     res.clearCookie(cookieKey)
     if (sid) {
@@ -64,28 +72,49 @@ function register(req, res) {
         return res.sendStatus(401)
     }
     // if the username dupilcates
-    getUser(username)
-    .then((duplicate) => {
+    Users.findOne({username: username}).exec((err, duplicate) => {
+        if (err) {
+            console.log(err)
+            return res.sendStatus(401)
+        }
+
         if (duplicate) {
             return res.send({"result": "username duplicate"})
         } 
         const hashedPassword = md5(salt + password)
         // restore the user into the Users database
         Users.create({username: username, salt: salt, hashedPassword: hashedPassword})
+        const email = req.body.email
+        const phone = req.body.phone
+        const dob = req.body.dob
+        const zipcode = req.body.zipcode
+        Profiles.create({username: username, status: "", following: [], email: email, 
+                        phone: phone, dob: dob, zipcode: zipcode, avatar: ""})
         return res.sendStatus(200)
-    }).catch(err => {
-        console.log(err)
-        return
     })
     
 }
 
 function changePassword(req, res) {
-    // Implement the function of changePassword
-}
+    console.log(req.username + " request for change password")
+    Users.findOne({username: req.username}).exec((err, user) =>{
+        if (err) {
+            console.log(err)
+            return res.sendStatus(401)
+        }
 
-getUser = function(username) {
-    return Users.findOne({username: username}).exec()
+        const newPassword = req.body.password
+        const newHashedPassword = md5(user.salt + newPassword)
+        console.log('here')
+        user.set({hashedPassword: newHashedPassword})
+        user.save((err, user) => {
+            if (err) {
+                console.log(err)
+                return handleError(err)
+            }
+            res.status(200).send({username: user.username, result:'success'})
+        })
+    })
 }
 
 module.exports = (app, isloggedin) => {

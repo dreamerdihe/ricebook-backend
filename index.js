@@ -43,9 +43,7 @@ function enableCORS(req, res, next) {
   }
 
 function isLoggedin(req, res, next) {
-    // console.log('try to get the cookie', req.cookies)
     var sid = req.cookies[cookieKey]
-    console.log('try to get the cookie', sid)
     
     if (!sid) {
         return res.sendStatus(401)
@@ -53,7 +51,12 @@ function isLoggedin(req, res, next) {
     // var username = sessionUser[sid]
 
     Session.findOne({sessionId: sid}, function(err, sessionUser) {
+        if (err) {
+            console.log(err)
+            return res.sendStatus(401)
+        }
         if(sessionUser != null) {
+            req.username = sessionUser.username
             return next();
         } else {
             return res.sendStatus(401)
