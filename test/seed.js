@@ -85,15 +85,16 @@ function seedDB() {
               
               console.log("New Profiles added!")
               PostsData.forEach((Postdata, j) => {
-                Posts.create({author: UserData.username, body: Postdata.body, picture: Postdata.body, comments: []}, (err, post) => {
-                  for (let i = 0; i < 2; i++) {
-                    const body = "this is " + i + " comment of the " + UserData.username + "'s " + j + " post"
-                    Comments.create({author: UserData.username, body: body}, (err, comment) => {
-                      if (err) { return console.log(err) }
-                      post.comments.push(comment._id)
-                    })
-                  }
-                  post.save()
+                const comments = [];
+                const body1 = "this is first comment of the " + UserData.username + "'s " + j + " post"
+                Comments.create({author: UserData.username, body: body1}, (err, comment) => {
+                  if (err) { return console.log(err) }
+                  comments.push(comment._id)
+                  const body2 = "this is second comment of the " + UserData.username + "'s " + j + " post"
+                  Comments.create({author: UserData.username, body: body2}, (err, comment) => {
+                    comments.push(comment._id)
+                    Posts.create({author: UserData.username, body: Postdata.body, picture: Postdata.body, comments: comments})
+                  })
                 })
               })
             })
