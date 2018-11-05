@@ -63,7 +63,7 @@ const PostsData = [
   }
 ]
 
-function seedDB() {
+function seedDBs() {
   Users.deleteMany({}, (err) => {
     if (err) { return console.log(err) }
 
@@ -104,5 +104,28 @@ function seedDB() {
     })
   })
 }
+
+async function seedDB() {
+  await Users.deleteMany()
+  await Session.deleteMany()
+  await Profiles.deleteMany()
+  await Posts.deleteMany()
+  await Comments.deleteMany()
+  for (let i = 0; i < 2; i++) {
+    await Users.create(UsersData[i])
+    await Profiles.create(ProfilesData[i])
+    for (let j = 0; j < 5; j++) {
+      let post = await Posts.create({author: UsersData[i].username, body: PostsData[j].body, picture: PostsData[j].picture, comments: []})
+      for (let k = 0; k < 2; k++) {
+        body = "this is "+ k +" comment of the " + UsersData[i].username + "'s " + j + " post"
+        let comment = await Comments.create({author: UsersData[i].username, body: body})
+        post.comments.push(comment._id)
+        await post.save()
+      }
+    }
+  }
+}
+
+
 
 module.exports = seedDB
