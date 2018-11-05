@@ -1,11 +1,37 @@
-const fs = require('fs')
+const Profiles = require('../model/profile')
 
-function getHeadline(res, req) {
-    // Implement the function of getting current user's headline
+
+function getHeadline(req, res) {
+    const username = req.username
+    console.log(username + ' request to get headline')
+    Profiles.findOne({username: username}).exec((err, user) => {
+        if (err) {
+            console.log(err)
+            return res.sendStatus(401)
+        }
+        return res.status(200).send({"headlines": user.status})
+    })
 }
 
-function editHeadline(res, req) {
-    // Implement the function of editting current user's headline
+function editHeadline(req, res) {
+    const username = req.username
+    const newHeadline = req.body.headline
+    console.log(username + ' request to edit headline to ' + newHeadline)
+    Profiles.findOne({username: username}).exec((err, user) => {
+        if (err) {
+            console.log(err)
+            return res.sendStatus(401)
+        }
+
+        user.set({status: newHeadline})
+        user.save((err, user) => {
+            if (err) {
+                console.log(err)
+                return handleError(err)
+            }
+            res.status(200).send({"username": user.username, "headline": user.status})
+        })
+    })
 }
 
 function getFollowingsHeadlines(res, req) {
@@ -47,7 +73,7 @@ function editAvatar(res, req) {
 module.exports = (app, isLoggedin) => {
    app.get('/headline', isLoggedin, getHeadline)
    app.put('/headline', isLoggedin, editHeadline)
-   app.get('/headlines', isLoggedin, getFollowingsHeadlines)
+   app.get('/headlines/:Profiles?', isLoggedin, getFollowingsHeadlines)
    app.get('/email', isLoggedin, getEmail)
    app.put('/email', isLoggedin, editEmail)
    app.get('/dob', isLoggedin, getDob)
