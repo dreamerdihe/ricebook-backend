@@ -19,7 +19,7 @@ const UsersData = [
 
 const ProfilesData = [
   {
-    accountName: "rice",
+    username: "rice",
     status: "Here is ricebook",
     following: [],
     email: "loverice@rice.edu",
@@ -29,7 +29,7 @@ const ProfilesData = [
     avatar: "https://i.ytimg.com/vi/haoytTpv2NU/maxresdefault.jpg"
   }, 
   {
-    accountName: "yuan",
+    username: "yuan",
     status: "Here is YuanHE",
     following: [],
     email: "yuan@rice.edu",
@@ -113,9 +113,10 @@ async function seedDB() {
   await Comments.deleteMany()
   for (let i = 0; i < 2; i++) {
     await Users.create(UsersData[i])
-    await Profiles.create(ProfilesData[i])
+    const user = await Profiles.create(ProfilesData[i])
     for (let j = 0; j < 5; j++) {
-      let post = await Posts.create({author: UsersData[i].username, body: PostsData[j].body, picture: PostsData[j].picture, comments: []})
+      const newAuthor = {id: user._id, username: user.username}
+      let post = await Posts.create({author: newAuthor, body: PostsData[j].body, picture: PostsData[j].picture, comments: []})
       for (let k = 0; k < 2; k++) {
         body = "this is "+ k +" comment of the " + UsersData[i].username + "'s " + j + " post"
         let comment = await Comments.create({author: UsersData[i].username, body: body})

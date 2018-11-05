@@ -1,7 +1,13 @@
 const mongoose = require("mongoose")
 
 const PostSchema = new mongoose.Schema({
-    author: String,
+    author: {
+        id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Profiles"
+        },
+        username: String
+    },
     body: String,
     date: Date,
     picture: String, 

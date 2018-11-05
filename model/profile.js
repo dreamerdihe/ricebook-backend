@@ -3,7 +3,12 @@ const mongoose = require("mongoose")
 const ProfileSchema = new mongoose.Schema({
     username: String,
     status: String,
-    following: [ String ],
+    following: [ 
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Profiles"
+        }
+    ],
     email: String,
     phone: String,
     dob: String,
