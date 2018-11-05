@@ -1,4 +1,3 @@
-const fs = require('fs')
 const md5 = require('md5')
 
 //import mongoDB
@@ -105,7 +104,6 @@ function changePassword(req, res) {
 
         const newPassword = req.body.password
         const newHashedPassword = md5(user.salt + newPassword)
-        console.log('here')
         user.set({hashedPassword: newHashedPassword})
         user.save((err, user) => {
             if (err) {
