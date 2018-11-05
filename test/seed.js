@@ -111,6 +111,7 @@ async function seedDB() {
   await Profiles.deleteMany()
   await Posts.deleteMany()
   await Comments.deleteMany()
+  console.log('clear all the data in the database')
   for (let i = 0; i < 2; i++) {
     await Users.create(UsersData[i])
     const user = await Profiles.create(ProfilesData[i])
@@ -125,8 +126,7 @@ async function seedDB() {
       }
     }
   }
+  console.log('reset all the test data in database')
 }
-
-
 
 module.exports = seedDB
