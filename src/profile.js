@@ -1,16 +1,45 @@
 const Profiles = require('../model/profile')
+const mongoose = require('mongoose')
 
 
 function getHeadline(req, res) {
     const username = req.username
-    console.log(username + ' request to get headline')
-    Profiles.findOne({username: username}).exec((err, user) => {
-        if (err) {
-            console.log(err)
-            return res.sendStatus(401)
+    let users = req.params.users
+    // if not specify the users, get the current user's headline
+    if (!users) {
+        console.log(username + ' request to get his headline')
+        Profiles.findOne({username: username}).exec((err, user) => {
+            if (err) {
+                console.log(err)
+                return res.sendStatus(401)
+            }
+            return res.status(200).send({"headline": user.status})
+        })
+    } else {
+        console.log(username + ' request to get some specific headlines')
+        users = users.split(',')
+        users = users.filter(user => mongoose.Types.ObjectId.isValid(user))
+        // no valid user id in the request
+        if (users.length === 0) {
+            console.log("no valid user id")
+            return res.send({"headlines": []})
+        } else {
+            Profiles.find({_id: {$in: users}}, (err, users) => {
+                if (err) {
+                    console.log(err)
+                    return res.sendStatus(401)
+                }
+                // if can't find the user
+                if (users.length === 0) {
+                    console.log("can't find these users")
+                    return res.send({"headlines": []})
+                }
+                const headlines = users.map((user) => ({ "username": user["username"], "headline": user["status"]}))
+                console.log(headlines)
+                return res.status(200).send({"headlines": headlines})
+            })
         }
-        return res.status(200).send({"headlines": user.status})
-    })
+    }
 }
 
 function editHeadline(req, res) {
@@ -32,10 +61,6 @@ function editHeadline(req, res) {
             res.status(200).send({"username": user.username, "headline": user.status})
         })
     })
-}
-
-function getFollowingsHeadlines(res, req) {
-    // Implement the function of getting current user's following headlines 
 }
 
 function getEmail(res, req) {
@@ -71,9 +96,8 @@ function editAvatar(res, req) {
 }
 
 module.exports = (app, isLoggedin) => {
-   app.get('/headline', isLoggedin, getHeadline)
+   app.get('/headline/:users?', isLoggedin, getHeadline)
    app.put('/headline', isLoggedin, editHeadline)
-   app.get('/headlines/:Profiles?', isLoggedin, getFollowingsHeadlines)
    app.get('/email', isLoggedin, getEmail)
    app.put('/email', isLoggedin, editEmail)
    app.get('/dob', isLoggedin, getDob)
