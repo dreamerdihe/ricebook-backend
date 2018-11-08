@@ -18,24 +18,27 @@ function login(req, res) {
     const password = req.body.password
 
     if (!username || !password) {
-        return res.status(401).send(false)
+        return res.sendStatus(403)
     }
     
     Users.findOne({username: username}).exec((err, user) => {
         if (err) {
             console.log(err)
-            return res.sendStatus(401)
+            return res.sendStatus(403)
+        }
+
+        if(!user) {
+            return res.sendStatus(404)
         }
 
         const hashedPassword = md5(user.salt + password)
-        
         if (!user || hashedPassword !== user.hashedPassword) {
-            return res.status(401).send(false)
+            return res.sendStatus(403)
         }
         
         const sessionKey = md5(mySecretMessage + new Date().getTime() + user.username)
         
-        Session.create({username: username, sessionId: sessionKey}, function(err, session) {
+        Session.findOneAndUpdate({username: username}, {username: username, sessionId: sessionKey}, {upsert: true, new: true}, function(err, session) {
             if (err) {
             console.log(err);
             return;
@@ -78,7 +81,7 @@ function register(req, res) {
         }
 
         if (duplicate) {
-            return res.send({"result": "username duplicate"})
+            return res.sendStatus(409)
         } 
         const hashedPassword = md5(salt + password)
         // restore the user into the Users database

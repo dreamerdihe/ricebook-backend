@@ -1,9 +1,11 @@
 const Posts = require('../model/post')
 const Profiles = require('../model/profile')
+const Comments = require('../model/comment')
 const mongoose = require('mongoose')
 
+
 // Implement the function of getting articles
-function getArticle(req, res) {    
+function getArticle(req, res) {
     const id = req.params.id
     if (!id) {
         console.log("one request for getting feed")
@@ -12,23 +14,15 @@ function getArticle(req, res) {
                 console.log(err)
                 return res.sendStatus(404)
             }
-            Posts.find().where('author.username').equals(user.username).exec((err, posts) => {
+            let target = [user._id]
+            
+            target = target.concat(user.following)
+            Posts.find().where('author.id').equals({$in: target}).populate("comments").exec((err, posts) => {
                 if (err) {
                     console.log(err)
-                    return res.sendStatus(404) 
+                    return res.sendStatus(404)
                 }
-                if (user.following) {
-                    Posts.find().where('author.id').equals({$in: user.following }).exec(
-                        (err, posts1) => {
-                         if (err) {
-                             console.log(err)
-                             return res.sendStatus(404)
-                         }
-                         posts.concat(posts1)
-                     })
-                     return res.send({articles: posts})
-                 }
-                 return res.send({articles: posts})
+                return res.send({articles: posts})
             })
         })
     } else {
@@ -55,7 +49,7 @@ function getArticle(req, res) {
                         if (!user) {
                             return res.send({"articles": []})
                         } else {
-                            Posts.find().where('author.username').equals(user.username).exec((err, posts) => {
+                            Posts.find().where('author.username').equals(user.username).populate("comments").exec((err, posts) => {
                                 if (err) {
                                     console.log(err)
                                 return res.sendStatus(404)
@@ -74,7 +68,118 @@ function getArticle(req, res) {
 
 // Implement the function of editting a specific articles
 function editArticle(req, res) {
-    
+    const username = req.username
+    const id = req.params.id
+    const text = req.body.text
+    const commentId = req.body.commentId
+
+    if (!commentId) {
+        // edit the article
+        console.log(username +  " request for eidt his post")
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404)
+        }
+
+        Posts.findById(id, (err, post) => {
+            if (err) {
+                console.log(err)
+                return res.sendStatus(404)
+            }
+            if (post.author.username !== username) {
+                return res.sendStatus(401)
+            }
+
+            post.body = text
+            post.save()
+            Profiles.findOne({username: username}, (err, user) => {
+                if (err) {
+                    console.log(err)
+                    return res.sendStatus(404)
+                }
+
+                let target = [user._id]
+                target = target.concat(user.following)
+                Posts.find().where('author.id').equals({$in: target}).populate("comments").exec((err, posts) => {
+                    if (err) {
+                        console.log(err)
+                        return res.sendStatus(404)
+                    }
+                    return res.send({articles: posts})
+                })
+            })
+        })
+    } else {
+        // edit the comment
+        if (commentId === -1) {
+            console.log(username + " request for adding a comment")
+            // add the comment
+            Posts.findById(id, (err, post) => {
+                if (err) {
+                    console.log(err)
+                    return res.sendStatus(404)
+                }
+
+                Comments.create({author: username, body: text}, (err, comment) => {
+                    if (err) {
+                        console.log(err)
+                        return res.sendStatus(404)
+                    }
+                    post.comments.push(comment.id)
+                    post.save()
+
+                    Profiles.findOne({username: req.username}, (err, user) => {
+                        if (err) {
+                            console.log(err)
+                            return res.sendStatus(404)
+                        }
+                        let target = [user._id]
+                        target = target.concat(user.following)
+            
+                        Posts.find().where('author.id').equals({$in: target}).populate("comments").exec((err, posts) => {
+                            if (err) {
+                                console.log(err)
+                                return res.sendStatus(404)
+                            }
+                            return res.send({articles: posts})
+                        })
+                    })
+                })
+            }) 
+        } else {
+            // edit the comment
+            console.log(username + " request for editting his comment")
+            Comments.findById(commentId, (err, comment) => {
+                if (err) {
+                    console.log(err)
+                    return res.sendStatus(404)
+                }
+
+                if (comment.author === username) {
+                    // own the comment
+                    comment.body = text
+                    comment.data = Date.now()
+                    comment.save()
+                    Profiles.findOne({username: username}, (err, user) => {
+                        if (err) {
+                            console.log(err)
+                            return res.sendStatus(404)
+                        }
+        
+                        let target = [user._id]
+                        target = target.concat(user.following)
+                        
+                        Posts.find().where('author.id').equals({$in: target}).populate("comments").exec((err, posts) => {
+                            if (err) {
+                                console.log(err)
+                                return res.sendStatus(404)
+                            }
+                            return res.send({articles: posts})
+                        })
+                    })
+                }
+            })
+        }
+    }
 }
 
 // Implement the function of posting an article
@@ -91,8 +196,19 @@ function postArticle(req, res) {
             if (err) {
                 console.log(err)
                 return res.status(404).send({'result': 'err'})
-            } 
-            return res.status(200).send({"articles": post})
+            }
+
+            let target = [user._id]
+            target = target.concat(user.following)
+
+            Posts.find().where('author.id').equals({$in: target}).populate("comments").exec((err, posts) => {
+                if (err) {
+                    console.log(err)
+                    return res.sendStatus(404)
+                }
+
+                return res.send({articles: posts})
+            })
         })
     })
 }

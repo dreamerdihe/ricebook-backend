@@ -13,6 +13,7 @@ const profile = require('./src/profile')
 const following = require('./src/following')
 
 // connect to mongoose
+
 const dataBaseUrl = "mongodb://ricebook:ricebook6@ds133281.mlab.com:33281/ricebook"
 mongoose.connect(dataBaseUrl, { useNewUrlParser: true });
 
@@ -46,8 +47,8 @@ function enableCORS(req, res, next) {
 
 function isLoggedin(req, res, next) {
     var sid = req.cookies[cookieKey]
-    
     if (!sid) {
+        console.log('one try to invade in')
         return res.sendStatus(401)
     }
     // var username = sessionUser[sid]
@@ -61,6 +62,7 @@ function isLoggedin(req, res, next) {
             req.username = sessionUser.username
             return next();
         } else {
+            console.log('one try to invade in')
             return res.sendStatus(401)
         }
     })

@@ -15,6 +15,21 @@ const UsersData = [
     salt: "this is a salt",
     hashedPassword: "9f910ba733ac99b9db73b838c86fcc0c"
   },
+  {
+    username: "mengxiao", 
+    salt: "this is a salt",
+    hashedPassword: "9f910ba733ac99b9db73b838c86fcc0c"
+  },
+  {
+    username: "messi",
+    salt: "this is a salt",
+    hashedPassword: "7025d57623683b3e9d78eab5d83f1659"
+  },
+  {
+    username: "sysu",
+    salt: "this is a salt",
+    hashedPassword: "7cad3279a74bf3916374a9b6c02e830d"
+  }
 ]
 
 const ProfilesData = [
@@ -36,7 +51,34 @@ const ProfilesData = [
     phone: "666-666-6666",
     dob: "1995-10-15",
     zipcode: "77005",
-    avatar: "https://riceowls.com/images/2017/5/1/rice-full-owl.jpg"
+    avatar: "https://pbs.twimg.com/profile_images/710858124274606080/DXJZdE76_400x400.jpg"
+  },
+  {
+    username: "mengxiao",
+    status: "London is a beautiful place",
+    email:  "mengxiao@sysu.edu",
+    phone: "123-337-1234",
+    dob: "1996-11-19",
+    zipcode: "77005",
+    avatar: "https://s.aolcdn.com/hss/storage/midas/e772d29f279be5980fe05aedffe585b1/205385868/Spider-Man++Homecoming+VR+Key+Art+copy.jpg"
+  },
+  {
+    username: "messi",
+    status: "best soccor player",
+    email: "123@qwe.ed",
+    phone: "123-456-7890",
+    dob: "1979-06-12",
+    zipcode: "12345",
+    avatar: "https://imagesvc.timeincapp.com/v3/mm/image?url=https%3A%2F%2Fpeopledotcom.files.wordpress.com%2F2016%2F08%2Flionel-messi-800.jpg%3Fw%3D800&w=700&c=sc&poi=face&q=85"
+  },
+  {
+    username: "sysu",
+    status: "Sun Yat-sen University",
+    email: "sysu@sysu.edu",
+    phone: "123-456-7890",
+    dob: "1979-06-12",
+    zipcode: "66666",
+    avatar: "http://international.iupui.edu/img/partnerships-initiatives/sysulogo-square.jpg"
   }
 ]
 
@@ -112,7 +154,7 @@ async function seedDB() {
   await Posts.deleteMany()
   await Comments.deleteMany()
   console.log('clear all the data in the database')
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 5; i++) {
     await Users.create(UsersData[i])
     const user = await Profiles.create(ProfilesData[i])
     for (let j = 0; j < 5; j++) {
