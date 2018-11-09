@@ -1,6 +1,24 @@
 const Profiles = require('../model/profile')
 const mongoose = require('mongoose')
 
+function search(req, res) {
+    console.log('one request for search someone')
+    const target = req.body.searchFor
+    if(!target) {
+        return res.sendStatus(403)
+    }
+
+    Profiles.findOne({username: target}, (err, user) => {
+        if (err) {
+            console.log(err)
+            return res.sendStatus(401)
+        }
+        if (!user) {
+            return res.send({result: "no user"})
+        }
+        return res.send({user: user, result: "success"})
+    })
+}
 
 function getHeadline(req, res) {
     const username = req.username
@@ -269,15 +287,16 @@ function editAvatar(req, res) {
 }
 
 module.exports = (app, isLoggedin) => {
-   app.get('/headline/:users?', isLoggedin, getHeadline)
-   app.put('/headline', isLoggedin, editHeadline)
-   app.get('/email/:user?', isLoggedin, getEmail)
-   app.put('/email', isLoggedin, editEmail)
-   app.get('/phone/:user?', isLoggedin, getPhone)
-   app.put('/phone', isLoggedin, editPhone)
-   app.get('/dob/:user?', isLoggedin, getDob)
-   app.get('/zipcode/:user?', isLoggedin, getZipcode)
-   app.put('/zipcode', isLoggedin, editZipcode)
-   app.get('/avatars/:user?', isLoggedin, getAvatar)
-   app.put('/avatar', isLoggedin, editAvatar)
+    app.post('/search', isLoggedin, search)    
+    app.get('/headline/:users?', isLoggedin, getHeadline)
+    app.put('/headline', isLoggedin, editHeadline)
+    app.get('/email/:user?', isLoggedin, getEmail)
+    app.put('/email', isLoggedin, editEmail)
+    app.get('/phone/:user?', isLoggedin, getPhone)
+    app.put('/phone', isLoggedin, editPhone)
+    app.get('/dob/:user?', isLoggedin, getDob)
+    app.get('/zipcode/:user?', isLoggedin, getZipcode)
+    app.put('/zipcode', isLoggedin, editZipcode)
+    app.get('/avatars/:user?', isLoggedin, getAvatar)
+    app.put('/avatar', isLoggedin, editAvatar)
 }

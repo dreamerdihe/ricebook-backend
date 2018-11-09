@@ -27,7 +27,7 @@ app.use(bodyParser.json())
 app.use(enableCORS)
 
 // set up router
-seedDB()
+// seedDB()
 auth(app, isLoggedin)
 articles(app, isLoggedin)
 profile(app, isLoggedin)

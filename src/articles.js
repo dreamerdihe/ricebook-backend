@@ -17,7 +17,7 @@ function getArticle(req, res) {
             let target = [user._id]
             
             target = target.concat(user.following)
-            Posts.find().where('author.id').equals({$in: target}).populate("comments").exec((err, posts) => {
+            Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).populate("comments").exec((err, posts) => {
                 if (err) {
                     console.log(err)
                     return res.sendStatus(404)
