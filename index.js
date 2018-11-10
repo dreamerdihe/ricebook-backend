@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 // import packages
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -14,8 +16,8 @@ const following = require('./src/following')
 
 // connect to mongoose
 
-const dataBaseUrl = "mongodb://ricebook:ricebook6@ds133281.mlab.com:33281/ricebook"
-mongoose.connect(dataBaseUrl, { useNewUrlParser: true });
+// const dataBaseUrl = "mongodb://ricebook:ricebook6@ds133281.mlab.com:33281/ricebook"
+mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
 
 // build my app
 const app = express()
@@ -27,7 +29,7 @@ app.use(bodyParser.json())
 app.use(enableCORS)
 
 // set up router
-// seedDB()
+seedDB()
 auth(app, isLoggedin)
 articles(app, isLoggedin)
 profile(app, isLoggedin)

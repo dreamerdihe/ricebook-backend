@@ -41,7 +41,7 @@ const ProfilesData = [
     phone: "123-456-7890",
     dob: "1995-10-15",
     zipcode: "77005",
-    avatar: "https://i.ytimg.com/vi/haoytTpv2NU/maxresdefault.jpg"
+    avatar: "https://cdn.worldvectorlogo.com/logos/rice-owls.svg"
   }, 
   {
     username: "yuan",
