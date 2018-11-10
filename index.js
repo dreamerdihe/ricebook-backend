@@ -5,7 +5,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
-const Session = require('../backend/model/session')
+const Session = require('./model/session')
 const seedDB = require('./test/seed')
 
 // import routers
