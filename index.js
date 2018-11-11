@@ -6,7 +6,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
 const Session = require('./model/session')
-const seedDB = require('./test/seed')
+// const seedDB = require('./test/seed')
 
 // import routers
 const auth = require('./src/auth')
@@ -15,8 +15,6 @@ const profile = require('./src/profile')
 const following = require('./src/following')
 
 // connect to mongoose
-
-// const dataBaseUrl = "mongodb://ricebook:ricebook6@ds133281.mlab.com:33281/ricebook"
 mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
 
 // build my app
