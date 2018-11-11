@@ -53,7 +53,6 @@ function isLoggedin(req, res, next) {
         console.log('one try to invade in')
         return res.sendStatus(401)
     }
-    // var username = sessionUser[sid]
 
     Session.findOne({sessionId: sid}, function(err, sessionUser) {
         if (err) {
