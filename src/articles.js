@@ -72,6 +72,7 @@ function editArticle(req, res) {
     const id = req.params.id
     const text = req.body.text
     const commentId = req.body.commentId
+    console.log(commentId)
 
     if (!commentId) {
         // edit the article
@@ -110,7 +111,7 @@ function editArticle(req, res) {
         })
     } else {
         // edit the comment
-        if (commentId === -1) {
+        if (commentId === '-1') {
             console.log(username + " request for adding a comment")
             // add the comment
             Posts.findById(id, (err, post) => {
@@ -135,7 +136,7 @@ function editArticle(req, res) {
                         let target = [user._id]
                         target = target.concat(user.following)
             
-                        Posts.find().where('author.id').equals({$in: target}).populate("comments").exec((err, posts) => {
+                        Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).populate("comments").exec((err, posts) => {
                             if (err) {
                                 console.log(err)
                                 return res.sendStatus(404)
@@ -168,7 +169,7 @@ function editArticle(req, res) {
                         let target = [user._id]
                         target = target.concat(user.following)
                         
-                        Posts.find().where('author.id').equals({$in: target}).populate("comments").exec((err, posts) => {
+                        Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).populate("comments").exec((err, posts) => {
                             if (err) {
                                 console.log(err)
                                 return res.sendStatus(404)
