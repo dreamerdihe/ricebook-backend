@@ -72,7 +72,6 @@ function editArticle(req, res) {
     const id = req.params.id
     const text = req.body.text
     const commentId = req.body.commentId
-    console.log(commentId)
 
     if (!commentId) {
         // edit the article
