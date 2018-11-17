@@ -28,7 +28,7 @@ app.use(enableCORS)
 // require('./uploadCloudinary.js').setup(app)
 
 // set up router
-// seedDB()
+seedDB()
 auth(app, isLoggedin)
 articles(app, isLoggedin)
 profile(app, isLoggedin)
@@ -45,28 +45,6 @@ function enableCORS(req, res, next) {
     res.header('Access-Control-Expose-Headers', 'Location, X-Session-Id')
     next();
   }
-
-// function isLoggedin(req, res, next) {
-//     var sid = req.cookies[cookieKey]
-//     if (!sid) {
-//         console.log('one try to invade in')
-//         return res.sendStatus(401)
-//     }
-
-//     Session.findOne({sessionId: sid}, function(err, sessionUser) {
-//         if (err) {
-//             console.log(err)
-//             return res.sendStatus(401)
-//         }
-//         if(sessionUser != null) {
-//             req.username = sessionUser.username
-//             return next();
-//         } else {
-//             console.log('one try to invade in')
-//             return res.sendStatus(401)
-//         }
-//     })
-// }
 
 const server = app.listen(port, () => {
      const addr = server.address()
