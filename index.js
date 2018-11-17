@@ -9,7 +9,8 @@ const Session = require('./model/session')
 // const seedDB = require('./test/seed')
 
 // import routers
-const auth = require('./src/auth')
+const auth = require('./src/auth').auth
+const isLoggedin = require('./src/auth').isLoggedin
 const articles = require('./src/articles')
 const profile = require('./src/profile')
 const following = require('./src/following')
@@ -20,11 +21,11 @@ mongoose.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true });
 // build my app
 const app = express()
 
-
 const cookieKey = 'sid'
 app.use(cookieParser())
 app.use(bodyParser.json())
 app.use(enableCORS)
+// require('./uploadCloudinary.js').setup(app)
 
 // set up router
 // seedDB()
@@ -45,27 +46,27 @@ function enableCORS(req, res, next) {
     next();
   }
 
-function isLoggedin(req, res, next) {
-    var sid = req.cookies[cookieKey]
-    if (!sid) {
-        console.log('one try to invade in')
-        return res.sendStatus(401)
-    }
+// function isLoggedin(req, res, next) {
+//     var sid = req.cookies[cookieKey]
+//     if (!sid) {
+//         console.log('one try to invade in')
+//         return res.sendStatus(401)
+//     }
 
-    Session.findOne({sessionId: sid}, function(err, sessionUser) {
-        if (err) {
-            console.log(err)
-            return res.sendStatus(401)
-        }
-        if(sessionUser != null) {
-            req.username = sessionUser.username
-            return next();
-        } else {
-            console.log('one try to invade in')
-            return res.sendStatus(401)
-        }
-    })
-}
+//     Session.findOne({sessionId: sid}, function(err, sessionUser) {
+//         if (err) {
+//             console.log(err)
+//             return res.sendStatus(401)
+//         }
+//         if(sessionUser != null) {
+//             req.username = sessionUser.username
+//             return next();
+//         } else {
+//             console.log('one try to invade in')
+//             return res.sendStatus(401)
+//         }
+//     })
+// }
 
 const server = app.listen(port, () => {
      const addr = server.address()

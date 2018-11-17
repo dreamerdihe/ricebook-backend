@@ -5,6 +5,7 @@ const Session = require('../model/session')
 const Users = require('../model/user')
 const Profiles = require('../model/profile')
 
+
 // some CONST
 const cookieKey = 'sid'
 const mySecretMessage = 'comp531 is very difficult'
@@ -118,7 +119,32 @@ function changePassword(req, res) {
     })
 }
 
-module.exports = (app, isloggedin) => {
+function isLoggedin(req, res, next) {
+    var sid = req.cookies[cookieKey]
+
+    if (!sid) {
+        console.log('one try to invade in')
+        return res.sendStatus(401)
+    }
+
+    Session.findOne({sessionId: sid}, function(err, sessionUser) {
+        if (err) {
+            console.log(err)
+            return res.sendStatus(401)
+        }
+        if(sessionUser != null) {
+            req.username = sessionUser.username
+            return next();
+        } else {
+            console.log('one try to invade in')
+            return res.sendStatus(401)
+        }
+    })
+}
+
+module.exports.isLoggedin = isLoggedin
+
+module.exports.auth = (app, isloggedin) => {
     app.post('/login', login)
     app.post('/register', register)
     app.put('/logout', isloggedin, logout)
