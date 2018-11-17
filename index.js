@@ -6,7 +6,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
 const Session = require('./model/session')
-// const seedDB = require('./test/seed')
+const seedDB = require('./test/seed')
 
 // import routers
 const auth = require('./src/auth').auth
