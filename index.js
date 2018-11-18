@@ -16,7 +16,7 @@ const profile = require('./src/profile')
 const following = require('./src/following')
 
 // connect to mongoose
-mongoose.connect(process.env.MONGOLAB_URL, { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
 // build my app
 const app = express()
