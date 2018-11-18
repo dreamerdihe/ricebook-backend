@@ -6,7 +6,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
 const Session = require('./model/session')
-// const seedDB = require('./test/seed')
+const seedDB = require('./test/seed')
 
 // import routers
 const auth = require('./src/auth').auth
@@ -16,7 +16,7 @@ const profile = require('./src/profile')
 const following = require('./src/following')
 
 // connect to mongoose
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
+mongoose.connect(process.env.MONGOLAB_URL, { useNewUrlParser: true });
 
 // build my app
 const app = express()
@@ -25,10 +25,10 @@ const cookieKey = 'sid'
 app.use(cookieParser())
 app.use(bodyParser.json())
 app.use(enableCORS)
-// require('./uploadCloudinary.js').setup(app)
+
 
 // set up router
-// seedDB()
+seedDB()
 auth(app, isLoggedin)
 articles(app, isLoggedin)
 profile(app, isLoggedin)

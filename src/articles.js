@@ -2,6 +2,8 @@ const Posts = require('../model/post')
 const Profiles = require('../model/profile')
 const Comments = require('../model/comment')
 const mongoose = require('mongoose')
+const uploadImage = require('../uploadCloudinary')
+const multer = require('multer')
 
 
 // Implement the function of getting articles
@@ -192,7 +194,11 @@ function postArticle(req, res) {
             return res.status(404).send({'result': 'err'})
         }
         const author = {id: user.id, username: req.username}
-        Posts.create({author: author, body: text, comments: []}, (err, post) => {
+        let picture = ''
+        if(req.fileurl) {
+            picture = req.fileurl;
+        }
+        Posts.create({author: author, body: text, comments: [], picture: picture}, (err, post) => {
             if (err) {
                 console.log(err)
                 return res.status(404).send({'result': 'err'})
@@ -216,5 +222,5 @@ function postArticle(req, res) {
 module.exports = (app, isloggedin) => {
    app.get('/articles/:id?', isloggedin, getArticle)
    app.put('/articles/:id', isloggedin, editArticle)
-   app.post('/article', isloggedin, postArticle)
+   app.post('/article', isloggedin, uploadImage('postImg'), postArticle)
 }

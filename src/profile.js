@@ -1,5 +1,6 @@
 const Profiles = require('../model/profile')
 const mongoose = require('mongoose')
+const uploadImage = require('../uploadCloudinary')
 
 function search(req, res) {
     console.log('one request for search someone')
@@ -275,7 +276,7 @@ function getAvatar(req, res) {
 
 function editAvatar(req, res) {
     // Implement the function of editting current user's avater
-    const newAvatar = req.body.avatar
+    const newAvatar = req.fileurl;
     console.log("one requset for updating his avatar")
     Profiles.findOneAndUpdate({username: req.username}, {$set: {avatar: newAvatar}}, {new: true}, (err, user) => {
         if (err) {
@@ -298,5 +299,5 @@ module.exports = (app, isLoggedin) => {
     app.get('/zipcode/:user?', isLoggedin, getZipcode)
     app.put('/zipcode', isLoggedin, editZipcode)
     app.get('/avatars/:user?', isLoggedin, getAvatar)
-    app.put('/avatar', isLoggedin, editAvatar)
+    app.put('/avatar', isLoggedin, uploadImage('avatar'), editAvatar)
 }
