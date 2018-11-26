@@ -1,3 +1,6 @@
+const md5 = require('md5')
+const Session = require('../model/session')
+const Users = require('../model/user')
 const Profiles = require('../model/profile')
 const mongoose = require('mongoose')
 const uploadImage = require('../uploadCloudinary')
@@ -287,6 +290,97 @@ function editAvatar(req, res) {
     })
 }
 
+function getThirdParty(req, res) {
+    console.log(req.username + ' request for his third party')
+    if(req.user !== undefined) {
+        const thirdParty = req.user.thirdParty
+        if (req.user.hashedPassword === undefined) {
+            return res.send({thirdParty: thirdParty, canLink: true})
+        } else {
+            return res.send({thirdParty: thirdParty, canLink: false})
+        }
+        
+    } else {
+        Users.findOne({username: req.username}, (err, user) => {
+            if(err) {
+                console.log(err)
+                return res.sendStatus(401)
+            }
+            return res.send({thirdParty: user.thirdParty, canLink: false})
+        })
+    }
+}
+
+function merge(req, res) {
+    const username = req.body.username
+    const password = req.body.password
+    console.log(req.username + ' request for linking account with ' + username)
+    // verify the user owns the ricebook account
+    if (!username || !password) {
+        return res.sendStatus(403)
+    }
+
+    Users.findOne({username: username}, (err, user) => {
+        if(err) {
+            console.log(err)
+            return res.sendStatus(403)
+        }
+
+        if(!user) {
+            return res.sendStatus(404)
+        }
+
+        const hashedPassword = md5(user.salt + password)
+        if (hashedPassword !== user.hashedPassword) {
+            return res.sendStatus(403)
+        }
+        // verify finishied
+        // first merge the User db
+        Users.findByIdAndDelete(req.user._id, (err, linkUser) => {
+            if(err) {
+                console.log(err)
+                return res.sendStatus(500)
+            }
+            linkThirdParty = linkUser.thirdParty.filter(linkParty => {
+                for(const party of user.thirdParty) {
+                    if (party.party === linkParty.party) {
+                        return false
+                    }
+                }
+                return true
+            })
+
+            user.thirdParty = user.thirdParty.concat(linkThirdParty)
+            user.save()
+            console.log('finish merge the user')
+        })  
+    })
+
+    // second merge the profile db
+    Profiles.findOne({username: username}, (err, profile) => {
+        if(err) {
+            console.log(err)
+            return sendStatus(500)
+        }
+
+        Profiles.findOneAndDelete({username: req.user.username}, (err, linkProfile) => {
+            const followings = linkProfile.following.filter((linkFol) => {
+                for(const fol of profile.following) {
+                    if (fol === linkFol || linkFol === profile.id) {
+                        return false
+                    }
+                    return true
+                }
+            })
+
+            profile.following = profile.following.concat(followings)
+            profile.save()
+            console.log('finish merge the profile')
+            return res.send({result: 'success'})
+        })
+    })
+}
+
 module.exports = (app, isLoggedin) => {
     app.post('/search', isLoggedin, search)    
     app.get('/headline/:users?', isLoggedin, getHeadline)
@@ -300,4 +394,6 @@ module.exports = (app, isLoggedin) => {
     app.put('/zipcode', isLoggedin, editZipcode)
     app.get('/avatars/:user?', isLoggedin, getAvatar)
     app.put('/avatar', isLoggedin, uploadImage('avatar'), editAvatar)
+    app.get('/thirdParty', isLoggedin, getThirdParty)
+    app.post('/merge', isLoggedin, merge)
 }

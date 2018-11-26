@@ -125,7 +125,6 @@ function changePassword(req, res) {
 }
 
 function isLoggedin(req, res, next) {
-    // console.log(req.isAuthenticated())
     if(req.isAuthenticated()){
         req.username = req.user.username
         return next()
@@ -164,7 +163,6 @@ module.exports.auth = (app, isloggedin) => {
     app.get('/login/github', githubPassport.authenticate('github', { scope: [ 'user:email' ] }));
     app.get('/login/github/callback', githubPassport.authenticate('github', { failureRedirect: '/fail'}),
     function(req, res) {
-        console.log(req.headers.referer)
         res.redirect(req.headers.referer + '/#/main')
   });
     app.post('/register', register)

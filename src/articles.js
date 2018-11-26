@@ -3,7 +3,6 @@ const Profiles = require('../model/profile')
 const Comments = require('../model/comment')
 const mongoose = require('mongoose')
 const uploadImage = require('../uploadCloudinary')
-const multer = require('multer')
 
 
 // Implement the function of getting articles

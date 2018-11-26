@@ -14,14 +14,17 @@ passport.use(new GitHubStrategy({
   function(accessToken, refreshToken, profile, done) {
     console.log(profile.displayName + ' try to login by github')
     const username = profile.displayName + '@github'
+    const githubUsername = profile.username
 
     // update the user if s/he exists or add a new user
-    User.findOne({username: username}, (err, user) => {
+    // the username of a github account can't duplicate
+    User.findOne({'thirdParty.party': 'github', 'thirdParty.username': githubUsername}, (err, user) => {
       if(err) {
-        return done(err);
+        console.log(err)
+        return done(err)
       } else {
         if(user === null) {
-          User.create({username: username, thirdParty: ['github']}, (err, newUser) => {
+          User.create({username: username, thirdParty: [{party: 'github', username: githubUsername}]}, (err, newUser) => {
             if(err) {
               return done(err);
             } else {
