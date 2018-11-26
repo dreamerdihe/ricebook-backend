@@ -1,9 +1,11 @@
 const md5 = require('md5')
+const githubPassport = require('../auth/github')
+
 
 //import mongoDB
-const Session = require('../model/session')
-const Users = require('../model/user')
-const Profiles = require('../model/profile')
+const Session = require('../../model/session')
+const Users = require('../../model/user')
+const Profiles = require('../../model/profile')
 
 
 // some CONST
@@ -61,8 +63,11 @@ function logout(req, res) {
                 return
             }
             res.clearCookie(cookieKey)
-            res.send({"status":"OK"})
+            return res.send({"status":"OK"})
         })        
+    } else {
+        req.logout()
+        return res.send({"status":"OK"})
     }
 }
 
@@ -120,32 +125,48 @@ function changePassword(req, res) {
 }
 
 function isLoggedin(req, res, next) {
+    // console.log(req.isAuthenticated())
+    if(req.isAuthenticated()){
+        req.username = req.user.username
+        return next()
+    }
     var sid = req.cookies[cookieKey]
 
     if (!sid) {
+        if(req.isAuthenticated()){
+            req.username = req.user.username
+            next()
+            return
+        }
         console.log('one try to invade in')
         return res.sendStatus(401)
+    } else {
+        Session.findOne({sessionId: sid}, function(err, sessionUser) {
+            if (err) {
+                console.log(err)
+                return res.sendStatus(401)
+            }
+            if(sessionUser != null) {
+                req.username = sessionUser.username
+                return next();
+            } else {
+                console.log('one try to invade in')
+                return res.sendStatus(401)
+            }
+        })
     }
-
-    Session.findOne({sessionId: sid}, function(err, sessionUser) {
-        if (err) {
-            console.log(err)
-            return res.sendStatus(401)
-        }
-        if(sessionUser != null) {
-            req.username = sessionUser.username
-            return next();
-        } else {
-            console.log('one try to invade in')
-            return res.sendStatus(401)
-        }
-    })
 }
 
 module.exports.isLoggedin = isLoggedin
 
 module.exports.auth = (app, isloggedin) => {
     app.post('/login', login)
+    app.get('/login/github', githubPassport.authenticate('github', { scope: [ 'user:email' ] }));
+    app.get('/login/github/callback', githubPassport.authenticate('github', { failureRedirect: '/fail'}),
+    function(req, res) {
+        console.log(req.headers.referer)
+        res.redirect(req.headers.referer + '/#/main')
+  });
     app.post('/register', register)
     app.put('/logout', isloggedin, logout)
     app.put('/password', isloggedin, changePassword)
