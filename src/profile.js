@@ -381,6 +381,25 @@ function merge(req, res) {
     })
 }
 
+function unlinkGithub(req, res) {
+    console.log(req.username + ' request for unlinking with github')
+    Users.findOne({username: req.username}, (err, user) => {
+        if(err) {
+            console.log(err)
+            return res.sendStatus(500)
+        }
+
+        user.thirdParty = user.thirdParty.filter(third => {
+            if(third.party === 'github') {
+                return false
+            }
+            return true
+        })
+        user.save()
+        return res.send({thirdParty: user.thirdParty})
+    })
+}
+
 module.exports = (app, isLoggedin) => {
     app.post('/search', isLoggedin, search)    
     app.get('/headline/:users?', isLoggedin, getHeadline)
@@ -396,4 +415,5 @@ module.exports = (app, isLoggedin) => {
     app.put('/avatar', isLoggedin, uploadImage('avatar'), editAvatar)
     app.get('/thirdParty', isLoggedin, getThirdParty)
     app.post('/merge', isLoggedin, merge)
+    app.put('/unlink/gitub', isLoggedin, unlinkGithub)
 }
