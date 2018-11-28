@@ -128,18 +128,8 @@ function isLoggedin(req, res, next) {
     if(req.isAuthenticated()){
         req.username = req.user.username
         return next()
-    }
-    var sid = req.cookies[cookieKey]
-
-    if (!sid) {
-        if(req.isAuthenticated()){
-            req.username = req.user.username
-            next()
-            return
-        }
-        console.log('one try to invade in')
-        return res.sendStatus(401)
     } else {
+        var sid = req.cookies[cookieKey]
         Session.findOne({sessionId: sid}, function(err, sessionUser) {
             if (err) {
                 console.log(err)
