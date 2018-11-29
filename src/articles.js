@@ -8,6 +8,8 @@ const uploadImage = require('../uploadCloudinary')
 // Implement the function of getting articles
 function getArticle(req, res) {
     const id = req.params.id
+    const offset = parseInt(req.params.offset)
+    console.log(offset)
     if (!id) {
         console.log("one request for getting feed")
         Profiles.findOne({username: req.username}, (err, user) => {
@@ -18,12 +20,12 @@ function getArticle(req, res) {
             let target = [user._id]
             
             target = target.concat(user.following)
-            Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).populate("comments").exec((err, posts) => {
+            Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).limit(10).skip(10 * offset).populate("comments").exec((err, posts) => {
                 if (err) {
                     console.log(err)
                     return res.sendStatus(404)
                 }
-                return res.send({articles: posts})
+                return res.send({username: req.username, articles: posts})
             })
         })
     } else {
@@ -55,7 +57,7 @@ function getArticle(req, res) {
                                     console.log(err)
                                 return res.sendStatus(404)
                                 }
-                                return res.send({"articles": posts})
+                                return res.send({articles: posts})
                             })
                         }
                     })
@@ -100,7 +102,7 @@ function editArticle(req, res) {
 
                 let target = [user._id]
                 target = target.concat(user.following)
-                Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).populate("comments").exec((err, posts) => {
+                Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).limit(10).populate("comments").exec((err, posts) => {
                     if (err) {
                         console.log(err)
                         return res.sendStatus(404)
@@ -136,7 +138,7 @@ function editArticle(req, res) {
                         let target = [user._id]
                         target = target.concat(user.following)
             
-                        Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).populate("comments").exec((err, posts) => {
+                        Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).limit(10).populate("comments").exec((err, posts) => {
                             if (err) {
                                 console.log(err)
                                 return res.sendStatus(404)
@@ -169,7 +171,7 @@ function editArticle(req, res) {
                         let target = [user._id]
                         target = target.concat(user.following)
                         
-                        Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).populate("comments").exec((err, posts) => {
+                        Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).limit(10).populate("comments").exec((err, posts) => {
                             if (err) {
                                 console.log(err)
                                 return res.sendStatus(404)
@@ -206,7 +208,7 @@ function postArticle(req, res) {
             let target = [user._id]
             target = target.concat(user.following)
 
-            Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).populate("comments").exec((err, posts) => {
+            Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).limit(10).populate("comments").exec((err, posts) => {
                 if (err) {
                     console.log(err)
                     return res.sendStatus(404)
@@ -218,8 +220,14 @@ function postArticle(req, res) {
     })
 }
 
+function test(req, res) {
+    const id = req.params.id
+    const offset = req.params.offset
+    return res.send({id: id, offset: offset})
+}
+
 module.exports = (app, isloggedin) => {
-   app.get('/articles/:id?', isloggedin, getArticle)
+   app.get('/articles/:id?/:offset', isloggedin, getArticle)
    app.put('/articles/:id', isloggedin, editArticle)
-   app.post('/article', isloggedin, uploadImage('postImg'), postArticle)
+   app.post('/articles', isloggedin, uploadImage('postImg'), postArticle)
 }
