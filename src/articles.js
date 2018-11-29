@@ -93,23 +93,9 @@ function editArticle(req, res) {
             }
 
             post.body = text
+            post.date = Date.now()
             post.save()
-            Profiles.findOne({username: username}, (err, user) => {
-                if (err) {
-                    console.log(err)
-                    return res.sendStatus(404)
-                }
-
-                let target = [user._id]
-                target = target.concat(user.following)
-                Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).limit(10).populate("comments").exec((err, posts) => {
-                    if (err) {
-                        console.log(err)
-                        return res.sendStatus(404)
-                    }
-                    return res.send({articles: posts})
-                })
-            })
+            return res.send({post: post})
         })
     } else {
         // edit the comment
@@ -129,29 +115,14 @@ function editArticle(req, res) {
                     }
                     post.comments.push(comment.id)
                     post.save()
-
-                    Profiles.findOne({username: req.username}, (err, user) => {
-                        if (err) {
-                            console.log(err)
-                            return res.sendStatus(404)
-                        }
-                        let target = [user._id]
-                        target = target.concat(user.following)
-            
-                        Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).limit(10).populate("comments").exec((err, posts) => {
-                            if (err) {
-                                console.log(err)
-                                return res.sendStatus(404)
-                            }
-                            return res.send({articles: posts})
-                        })
-                    })
+                    
+                    return res.send({comment: comment})
                 })
             }) 
         } else {
             // edit the comment
             console.log(username + " request for editting his comment")
-            Comments.findById(commentId, (err, comment) => {
+            Comments.findById(commentId).populate("comments").exec( (err, comment) => {
                 if (err) {
                     console.log(err)
                     return res.sendStatus(404)
@@ -160,25 +131,9 @@ function editArticle(req, res) {
                 if (comment.author === username) {
                     // own the comment
                     comment.body = text
-                    comment.data = Date.now()
+                    comment.date = Date.now()
                     comment.save()
-                    Profiles.findOne({username: username}, (err, user) => {
-                        if (err) {
-                            console.log(err)
-                            return res.sendStatus(404)
-                        }
-        
-                        let target = [user._id]
-                        target = target.concat(user.following)
-                        
-                        Posts.find().where('author.id').equals({$in: target}).sort({date: -1}).limit(10).populate("comments").exec((err, posts) => {
-                            if (err) {
-                                console.log(err)
-                                return res.sendStatus(404)
-                            }
-                            return res.send({articles: posts})
-                        })
-                    })
+                    return res.send({comment: comment})
                 }
             })
         }
