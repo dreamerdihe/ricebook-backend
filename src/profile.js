@@ -2,6 +2,7 @@ const md5 = require('md5')
 const Session = require('../model/session')
 const Users = require('../model/user')
 const Profiles = require('../model/profile')
+const Posts = require('../model/post')
 const mongoose = require('mongoose')
 const uploadImage = require('../uploadCloudinary')
 
@@ -363,6 +364,8 @@ function merge(req, res) {
             return sendStatus(500)
         }
 
+
+
         Profiles.findOneAndDelete({username: req.user.username}, (err, linkProfile) => {
             const followings = linkProfile.following.filter((linkFol) => {
                 for(const fol of profile.following) {
@@ -371,6 +374,9 @@ function merge(req, res) {
                     }
                     return true
                 }
+            })
+
+            Posts.update({'author.id': linkProfile.id}, {author: {id: profile.id, username: profile.username}}, { multi: true }, (err, res) => {
             })
 
             profile.following = profile.following.concat(followings)

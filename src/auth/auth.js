@@ -153,7 +153,7 @@ module.exports.auth = (app, isloggedin) => {
     app.get('/login/github', githubPassport.authenticate('github', { scope: [ 'user:email' ] }));
     app.get('/login/github/callback', githubPassport.authenticate('github', { failureRedirect: '/fail'}),
     function(req, res) {
-        res.redirect('http://localhost:4200/#/main')
+        res.redirect('http://ricebook-yh.surge.sh/#/main')
   });
     app.post('/register', register)
     app.put('/logout', isloggedin, logout)

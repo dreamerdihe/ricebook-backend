@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
 const session = require('express-session')
 const passport = require('passport')
-// const seedDB = require('./test/seed')
+const seedDB = require('./test/seed')
 
 // import routers
 const auth = require('./src/auth/auth').auth
@@ -17,7 +17,7 @@ const profile = require('./src/profile')
 const following = require('./src/following')
 
 // connect to mongoose
-mongoose.connect(process.env.MONGOLAB_URL, { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
 // build my app
 const app = express()
@@ -38,7 +38,7 @@ app.use(enableCORS)
 
 
 // set up router
-// seedDB()
+seedDB()
 auth(app, isLoggedin)
 articles(app, isLoggedin)
 profile(app, isLoggedin)
