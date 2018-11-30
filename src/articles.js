@@ -9,7 +9,6 @@ const uploadImage = require('../uploadCloudinary')
 function getArticle(req, res) {
     const id = req.params.id
     const offset = parseInt(req.params.offset)
-    console.log(offset)
     if (!id) {
         console.log("one request for getting feed")
         Profiles.findOne({username: req.username}, (err, user) => {
